@@ -546,7 +546,7 @@ prompt_pure_async_callback() {
 			[[ -n $info[top] ]] && [[ -z $prompt_pure_vcs_info[top] ]] && prompt_pure_async_refresh
 
 			# Always update branch, top-level and stash.
-			prompt_pure_vcs_info[branch]=$info[branch]
+			prompt_pure_vcs_info[branch]=${info[branch]/#jj\/*/[JJ]}
 			prompt_pure_vcs_info[top]=$info[top]
 			prompt_pure_vcs_info[action]=$info[action]
 
