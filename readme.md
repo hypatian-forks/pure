@@ -1,6 +1,7 @@
 # Pure
 
-> Pretty, minimal and fast ZSH prompt
+> Pretty, minimal and fast ZSH prompt (one-line version)
+
 
 <img src="screenshot.png" width="864">
 
@@ -84,6 +85,7 @@ prompt pure
 | **`PURE_GIT_PULL`**              | Prevents Pure from checking whether the current Git remote has been updated.                   | `1`            |
 | **`PURE_GIT_UNTRACKED_DIRTY`**   | Do not include untracked files in dirtiness check. Mostly useful on large repos (like WebKit). | `1`            |
 | **`PURE_GIT_DELAY_DIRTY_CHECK`** | Time in seconds to delay git dirty checking when `git status` takes > 5 seconds.               | `1800` seconds |
+| **`PURE_PATH_FORMAT`**           | Defines the format used to generate the path (to allow truncation                              | `%~`           |
 | **`PURE_PROMPT_SYMBOL`**         | Defines the prompt symbol.                                                                     | `❯`            |
 | **`PURE_PROMPT_VICMD_SYMBOL`**   | Defines the prompt symbol used when the `vicmd` keymap is active (VI-mode).                    | `❮`            |
 | **`PURE_SUSPENDED_JOBS_SYMBOL`** | Defines the symbol that indicates that jobs are running in the background. Set to empty to disable. | `✦`            |
@@ -130,6 +132,10 @@ Path separator dimming makes `/` characters in the path visually dimmer to help 
 `zstyle :prompt:pure:path:separator dim yes`
 
 Hostname display is enabled by default when in an SSH session or container. You can disable it while still showing the username with:
+
+`zstyle :prompt:pure:spacing compact yes`
+
+By default, newlines are included before and in the middle of the prompt to provide a sense of space. When compact more is on, the prompt is printed on one line and no newlines is printed before the prompt.
 
 `zstyle :prompt:pure:host show no`
 

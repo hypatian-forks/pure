@@ -126,7 +126,7 @@ prompt_pure_set_colors() {
 }
 
 prompt_pure_set_path_separator() {
-	typeset -g prompt_pure_path_segment="%F{${prompt_pure_colors[path]}}%~%f"
+	typeset -g prompt_pure_path_segment="%F{${prompt_pure_colors[path]}}${PURE_PATH_FORMAT:-%~}%f"
 
 	if zstyle -t ':prompt:pure:path:separator' dim; then
 		typeset -g prompt_pure_path_separator_dimmed=1
@@ -139,7 +139,7 @@ prompt_pure_render_dimmed_path() {
 	setopt localoptions noshwordsplit
 
 	# This runs from PROMPT_SUBST so directory changes followed by reset-prompt redraw correctly without precmd.
-	local current_path=${1:-${(%):-%~}}
+	local current_path=${1:-${(%):-${PURE_PATH_FORMAT:-%~}}}
 	current_path=${current_path//\%/%%}
 
 	local separator=$'%{\e[2m%}/%{\e[22m%}'
@@ -228,7 +228,9 @@ prompt_pure_preprompt_render() {
 
 	if [[ $1 == precmd ]]; then
 		# Initial newline, for spaciousness.
-		print
+		if ! zstyle -t ":prompt:pure:spacing" compact; then
+			print
+		fi
 	elif [[ $prompt_pure_last_prompt != $prompt_fingerprint ]]; then
 		# Redraw the prompt.
 		prompt_pure_reset_prompt
@@ -243,6 +245,13 @@ prompt_pure_precmd() {
 	# Check execution time and store it in a variable.
 	prompt_pure_check_cmd_exec_time
 	unset prompt_pure_cmd_timestamp
+
+	if ! zstyle -t ":prompt:pure:spacing" compact; then
+		prompt_pure_newline="${prompt_newline}"
+	else
+		prompt_pure_newline=' '
+	fi
+
 
 	# Shows the full path in the title.
 	prompt_pure_set_title 'expand-prompt' '%~'
@@ -320,10 +329,14 @@ prompt_pure_async_vcs_info() {
 
 	# Configure `vcs_info` inside an async task. This frees up `vcs_info`
 	# to be used or configured as the user pleases.
-	zstyle ':vcs_info:*' enable git
+	# Enable both jujutsu and git, jj first in case of colocation
+	zstyle ':vcs_info:*' enable jj git
 	zstyle ':vcs_info:*' use-simple true
 	# Only export four message variables from `vcs_info`.
 	zstyle ':vcs_info:*' max-exports 3
+	# Export JJ branch (%b), toplevel (%R), and misc (changes, up, down) (%m)
+	zstyle ':vcs_info:jj*' formats '%b' '%R' '%m'
+	zstyle ':vcs_info:jj*' actionformats '%b' '%R' '%m'
 	# Export branch (%b), Git toplevel (%R), action (rebase/cherry-pick) (%a)
 	zstyle ':vcs_info:git*' formats '%b' '%R' '%a'
 	zstyle ':vcs_info:git*' actionformats '%b' '%R' '%a'
@@ -1185,8 +1198,7 @@ prompt_pure_setup() {
 	PROMPT+='%(19V. %F{$prompt_pure_colors[execution_time]}%19v%f.)'
 	PROMPT+='%(23V. %F{$prompt_pure_colors[custom:suffix]}%23v%f.)'
 
-	# Newline separating preprompt from prompt.
-	PROMPT+='${prompt_newline}'
+	PROMPT+='${prompt_pure_newline}'
 
 	# Prompt line: virtualenv and prompt symbol.
 	PROMPT+='%(20V.%F{$prompt_pure_colors[virtualenv]}%20v%f .)'
